@@ -1,3 +1,5 @@
+library("timeSeries") # Library
+
 # Joining DFs into one when there are common observations in both time series
 full.join.common <- function(x, y, col1, col2){
   
@@ -29,13 +31,13 @@ full.join.common <- function(x, y, col1, col2){
   
   df7 <- df7[apply(df7, 1, function(x) all(!is.na(x))),] # Get rid of NA
   
-  ts <- df7[,1] # Put time series values into new column
+  ts <- as.Date(df7[,1]) # Put time series values into new column
   
-  df7 <- as.data.frame(df7[,-1]) # Put other values into new column
+  df7 <- as.data.frame(as.numeric(df7[,-1])) # Put other values into new column
   
   rownames(df7) <- ts # Make time series row names
   colnames(df7) <- col2 # Give column name
   
-  df7 # Display United Data Frame
+  as.timeSeries(df7) # Display United Data Frame
 }
 full.join.common(magn.data.test.df1, magn.data.test.df, "Date", "MAGN") # Test

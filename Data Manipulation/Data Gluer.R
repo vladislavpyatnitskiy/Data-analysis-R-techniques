@@ -1,22 +1,28 @@
 lapply(c("quantmod", "timeSeries"), require, character.only = T) # Libraries
 
-df.gluer <- function(x){ # Glue data from Yahoo and CSV file
+df.gluer <- function(x){ # Merge data frames from CSV file and Yahoo web site
   
-  R <- as.character(read.fwf(textConnection(x), widths = c(25, 29),
-                             colClasses="character")[2])
+  f <- read.csv(x) # Read CSV
   
-  R <- read.fwf(textConnection(R), widths=c(4, 8), colClasses="character")[1]
+  C <- NULL # Make data frame
   
-  C <- read.csv(x)[,c(3,8)] # Read CSV
+  for (n in 1:nrow(f)){ # Divide column into three
+    
+    C <- rbind.data.frame(C, unlist(strsplit(as.character(f[n,]), "\\;"))) }
+  
+  C <- C[,c(3,8)] # Subtract data and price column and ticker
+  
+  R <- strsplit(toString(strsplit(toString(x), "\\/")[[1]][4]), "\\_")[[1]][1]
   
   C[,1] <- format(strptime(C[,1], format = "%y%m%d"), "%Y-%m-%d")
   
-  d <- C[,1]
-  C <- as.data.frame(C[,-1])
-  rownames(C) <- d
-  colnames(C) <- R
+  d <- C[,1] # Subtract dates into different column 
+  C <- as.data.frame(C[,-1]) # Reduce dates from main data frame
   
-  S <- prices.yahoo(sprintf("%s%s", R, ".ME")) # Data from Yahoo
+  rownames(C) <- d # Assign dates as row names 
+  colnames(C) <- R # Assign ticker as column name
+  
+  S <- prices.yahoo(sprintf("%s%s", R, ".ME")) # Create ticker for Yahoo!
   
   df1 <- data.frame(rownames(S), S[,1]) # First Data Frame
   df2 <- data.frame(rownames(C), C[,1]) # Second Data Frame
@@ -57,4 +63,4 @@ df.gluer <- function(x){ # Glue data from Yahoo and CSV file
   
   as.timeSeries(df7) # Display United Data Frame
 }
-df.gluer("~/Desktop/Family Account/LSRG_220101_240815.csv") # Test
+df.gluer("~/Desktop/Family Account/GLTR_220101_240815.csv")
